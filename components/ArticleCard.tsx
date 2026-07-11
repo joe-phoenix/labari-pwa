@@ -36,8 +36,11 @@ export function ArticleCard({ article, variant = 'default', isBookmarked = false
       onKeyDown={(e) => e.key === 'Enter' && onOpen(article)}
       className={[
         'group relative flex cursor-pointer flex-col overflow-hidden rounded-xl',
-        'bg-white dark:bg-neutral-900 transition-transform duration-200 ease-out',
-        'hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500',
+        'border border-neutral-900/[0.06] bg-white shadow-[0_1px_2px_rgba(10,10,10,0.04)]',
+        'dark:border-white/[0.06] dark:bg-neutral-900 dark:shadow-none',
+        'transition-all duration-200 ease-out',
+        'hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(10,10,10,0.08)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)]',
+        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500',
         isFeatured ? 'sm:col-span-2 sm:row-span-2' : '',
       ].join(' ')}
     >
@@ -67,14 +70,16 @@ export function ArticleCard({ article, variant = 'default', isBookmarked = false
           <span>{article.category}</span>
         </div>
 
-        <h3
+        <h2
           className={[
-            'font-serif font-medium leading-snug text-neutral-900 dark:text-neutral-50',
-            isFeatured ? 'text-2xl sm:text-3xl' : 'text-lg',
+            'font-serif font-medium text-neutral-900 dark:text-neutral-50',
+            isFeatured
+              ? 'text-2xl leading-[1.15] tracking-tight sm:text-3xl'
+              : 'text-lg leading-snug line-clamp-3',
           ].join(' ')}
         >
           {article.title}
-        </h3>
+        </h2>
 
         {isFeatured && (
           <p className="line-clamp-2 text-sm text-neutral-600 dark:text-neutral-300 font-sans">

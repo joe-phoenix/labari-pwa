@@ -13,18 +13,26 @@ import {
 const FEED_ENDPOINT = 'https://labari-feed.joseph-kuuire.workers.dev/feed';
 const SOURCE_KEY = 'merged';
 
-export function useFeed(category?: string) {
-  const [articles, setArticles] = useState<NormalizedArticle[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useFeed(category?: string, initialArticles: NormalizedArticle[] = []) {
+  const filteredInitial = category
+    ? initialArticles.filter((a) => a.category === category)
+    : initialArticles;
+
+  const [articles, setArticles] = useState<NormalizedArticle[]>(filteredInitial);
+  const [loading, setLoading] = useState(filteredInitial.length === 0);
   const [isOffline, setIsOffline] = useState(false);
 
   const sync = useCallback(async () => {
-    // 1. Always show cached content immediately (instant, works offline)
+    // 1. Show cached content immediately (works offline, and covers the case
+    //    where the build-time fetch above returned nothing).
     const cached = await getCachedArticles(category);
-    if (cached.length) setArticles(cached);
-    setLoading(cached.length === 0);
+    if (cached.length) {
+      setArticles(cached);
+      setLoading(false);
+    }
 
-    // 2. Attempt a network delta-fetch in the background
+    // 2. Attempt a network delta-fetch in the background to pick up anything
+    //    published since this static build was generated.
     try {
       const meta = await getFeedMeta(SOURCE_KEY);
       const since = meta?.lastFetchedAt
@@ -47,7 +55,7 @@ export function useFeed(category?: string) {
       setArticles(fresh);
       setIsOffline(false);
     } catch (err) {
-      // Offline or worker unreachable — cached content already shown above
+      // Offline or worker unreachable — cached/build-time content already shown
       setIsOffline(true);
     } finally {
       setLoading(false);
@@ -55,10 +63,16 @@ export function useFeed(category?: string) {
   }, [category]);
 
   useEffect(() => {
+    // Seed IndexedDB with the build-time articles immediately so they're
+    // available offline even before the first network sync completes.
+    if (initialArticles.length) {
+      cacheArticles(initialArticles).catch(() => {});
+    }
     sync();
     const onOnline = () => sync();
     window.addEventListener('online', onOnline);
     return () => window.removeEventListener('online', onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sync]);
 
   return { articles, loading, isOffline, refresh: sync };
