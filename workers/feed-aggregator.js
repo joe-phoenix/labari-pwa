@@ -76,7 +76,11 @@ async function refreshMergedFeed(env) {
 
 async function fetchSource(source) {
   const res = await fetch(
-    `${source.apiBase}/posts?per_page=30&_embed=wp:featuredmedia,wp:term&orderby=date`,
+    // per_page=100 is the WordPress REST API's maximum. At 30, infrequent
+    // categories (e.g. Sports, Opinion) could have zero matches in the merged
+    // feed even though older matching articles exist on the site, simply
+    // because the most recent 30 posts didn't happen to include any.
+    `${source.apiBase}/posts?per_page=100&_embed=wp:featuredmedia,wp:term&orderby=date`,
     { headers: { 'User-Agent': 'LabariFeedAggregator/1.0' } }
   );
   if (!res.ok) throw new Error(`${source.id} fetch failed: ${res.status}`);
