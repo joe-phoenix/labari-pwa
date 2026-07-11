@@ -87,8 +87,18 @@ async function fetchSource(source) {
 function normalizePost(post, source) {
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const terms = post._embedded?.['wp:term']?.flat() ?? [];
-  const category = terms.find((t) => t.taxonomy === 'category')?.name ?? 'General';
+  const rawCategory = terms.find((t) => t.taxonomy === 'category')?.name ?? 'General';
   const tags = terms.filter((t) => t.taxonomy === 'post_tag').map((t) => t.name);
+
+  // Editorial decision: TechLabari is Labari Media's technology vertical, not a
+  // separate section taxonomy. Every TechLabari article rolls up into one
+  // "Technology" section in the unified app, regardless of its own site's
+  // internal category (News, Finance, AI, Crypto And Web3, etc.). Labari
+  // Journal's own section structure (Government and Politics, Business,
+  // Society, Culture and Lifestyle, Opinion, etc.) remains the primary
+  // taxonomy for everything else, and any Labari Journal piece already
+  // tagged "Technology" naturally joins the same bucket as TechLabari content.
+  const category = source.id === 'techlabari' ? 'Technology' : rawCategory;
 
   const plainExcerpt = stripHtml(post.excerpt?.rendered ?? '');
   const wordCount = stripHtml(post.content?.rendered ?? '').split(/\s+/).length;

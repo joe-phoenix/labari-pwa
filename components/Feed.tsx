@@ -10,17 +10,21 @@ import { NormalizedArticle } from '@/lib/db';
 // (19 distinct categories seen in a 60-article sample). These are the highest-frequency,
 // most reader-meaningful ones; less common tags (Opinion, Spotlight, Guides, Energy + Power,
 // Health & Science, Consumer Tech, Lifestyle) fall under "All" rather than getting their own chip.
+// Technology is now a merged bucket: every TechLabari article (Labari Media's
+// tech vertical) plus any Labari Journal piece tagged Technology. Everything
+// else uses Labari Journal's own section taxonomy, since TechLabari no longer
+// contributes its own separate categories after the Worker-side consolidation.
 const CATEGORIES = [
   'All',
-  'News',
+  'Technology',
   'Government and Politics',
   'Business',
-  'Finance',
-  'Technology',
-  'Artificial Intelligence',
-  'Crypto And Web3',
   'Society, Culture and Lifestyle',
   'Crime and Law',
+  'Sports',
+  'Opinion',
+  'Media and Entertainment',
+  'Spotlight',
 ];
 
 export function Feed({

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Source_Serif_4, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { RegisterSW } from './register-sw';
+import { ThemeProvider } from './ThemeProvider';
 
 // next/font self-hosts these at build time — no external request to fonts.gstatic.com,
 // so there's no stale-CDN-hash risk like the hardcoded <link rel="preload"> this replaces.
@@ -42,8 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sourceSerif.variable} ${dmSans.variable}`}>
       <body>
-        {children}
-        <RegisterSW />
+        <ThemeProvider>
+          {children}
+          <RegisterSW />
+        </ThemeProvider>
       </body>
     </html>
   );
