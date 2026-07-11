@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Feed } from '@/components/Feed';
 import { CategoryNav } from '@/components/CategoryNav';
 import { ArticleReader } from '@/components/ArticleReader';
@@ -59,8 +60,15 @@ export function HomeClient({ initialArticles }: { initialArticles: NormalizedArt
       <div className="sticky top-0 z-40 bg-cream/90 backdrop-blur-md dark:bg-neutral-950/90">
         <header className="mx-auto max-w-5xl px-4 pt-8">
           <div className="flex items-baseline justify-between">
-            <h1 className="font-serif text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
-              Labari Media
+            <h1 className="flex items-center">
+              <Image
+                src={theme === 'dark' ? '/logo/labari-media-white.png' : '/logo/labari-media-black.png'}
+                alt="Labari Media"
+                width={200}
+                height={25}
+                priority
+                className="h-6 w-auto sm:h-7"
+              />
             </h1>
             <div className="flex items-center gap-3">
               <time className="font-sans text-xs uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
