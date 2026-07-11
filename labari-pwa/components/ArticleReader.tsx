@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { NormalizedArticle, toggleBookmark, isBookmarked, getCachedArticles } from '@/lib/db';
+import { useTheme } from '@/app/ThemeProvider';
 
 interface ArticleReaderProps {
   articleId: string;
@@ -17,7 +18,7 @@ export function ArticleReader({ articleId, onClose }: ArticleReaderProps) {
   const [article, setArticle] = useState<NormalizedArticle | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [fontIndex, setFontIndex] = useState(1);
-  const [theme, setTheme] = useState<'system' | 'light' | 'dark'>('system');
+  const { theme, toggleTheme } = useTheme();
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
@@ -41,16 +42,6 @@ export function ArticleReader({ articleId, onClose }: ArticleReaderProps) {
   useEffect(() => {
     document.documentElement.style.setProperty('--text-scale', String(FONT_SCALES[fontIndex]));
   }, [fontIndex]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') root.classList.add('dark');
-    else if (theme === 'light') root.classList.remove('dark');
-    else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', prefersDark);
-    }
-  }, [theme]);
 
   const handleBookmark = async () => {
     if (!article) return;
@@ -105,7 +96,7 @@ export function ArticleReader({ articleId, onClose }: ArticleReaderProps) {
           fontIndex={fontIndex}
           onFontChange={setFontIndex}
           theme={theme}
-          onThemeChange={setTheme}
+          onToggleTheme={toggleTheme}
         />
       }
     >
@@ -206,15 +197,15 @@ function ReaderToolbar({
   fontIndex,
   onFontChange,
   theme,
-  onThemeChange,
+  onToggleTheme,
 }: {
   bookmarked: boolean;
   onBookmark: () => void;
   onShare: () => void;
   fontIndex: number;
   onFontChange: (i: number) => void;
-  theme: 'system' | 'light' | 'dark';
-  onThemeChange: (t: 'system' | 'light' | 'dark') => void;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
 }) {
   return (
     <div className="flex items-center gap-1">
@@ -238,8 +229,8 @@ function ReaderToolbar({
       </div>
 
       <button
-        onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
-        aria-label="Toggle dark mode"
+        onClick={onToggleTheme}
+        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         className="rounded-full p-2 text-neutral-600 hover:bg-neutral-200/60 dark:text-neutral-300 dark:hover:bg-neutral-800"
       >
         <ThemeIcon dark={theme === 'dark'} />
