@@ -13,6 +13,7 @@ export function HomeClient({ initialArticles }: { initialArticles: NormalizedArt
   const [openArticleId, setOpenArticleId] = useState<string | null>(null);
   const [today, setToday] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -92,19 +93,43 @@ export function HomeClient({ initialArticles }: { initialArticles: NormalizedArt
               </button>
             </div>
           </div>
-          <p className="mt-1 font-sans text-sm text-neutral-600 dark:text-neutral-400">
-            TechLabari &amp; Labari Journal, one feed
-          </p>
         </header>
 
         <div className="mx-auto max-w-5xl px-4 pb-3 pt-4">
+          <div className="relative mb-3">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
+            </svg>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search articles"
+              aria-label="Search articles"
+              className="w-full rounded-full border border-neutral-900/[0.08] bg-white py-2 pl-9 pr-4 font-sans text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-white/[0.08] dark:bg-neutral-900 dark:text-neutral-50"
+            />
+          </div>
           <CategoryNav activeCategory={activeCategory} onChange={setActiveCategory} />
         </div>
 
         <div className="h-px w-full bg-gradient-to-r from-neutral-900/70 via-neutral-900/20 to-transparent dark:from-neutral-100/60 dark:via-neutral-100/15" />
       </div>
 
-      <Feed onOpenArticle={handleOpen} initialArticles={initialArticles} activeCategory={activeCategory} />
+      <Feed
+        onOpenArticle={handleOpen}
+        initialArticles={initialArticles}
+        activeCategory={activeCategory}
+        searchQuery={searchQuery}
+      />
 
       {openArticleId && <ArticleReader articleId={openArticleId} onClose={handleClose} />}
     </main>
