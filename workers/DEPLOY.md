@@ -84,7 +84,31 @@ No code change needed — `lib/useFeed.ts` already points at
 JSON, running the PWA locally (`npm run dev`) should show real articles in the
 feed instead of an empty state.
 
+## Keeping the static site's content fresh (not just the /feed endpoint)
+
+The `/feed` endpoint refreshes every 10 minutes on its own — but since the PWA
+itself is a static export, new articles don't appear on the actual site until
+it rebuilds. These steps wire up an automatic rebuild trigger:
+
+1. **Create a Deploy Hook**: Cloudflare Pages project → **Settings** →
+   **Builds & deployments** → **Deploy hooks** → give it a name (e.g. "content
+   refresh") → copy the generated URL.
+2. **Store it as a Worker secret**: on the `labari-feed` Worker's dashboard
+   page → **Settings** → **Variables and Secrets** → add a secret named
+   `DEPLOY_HOOK_URL` with that URL as the value (use "Encrypt" so it isn't
+   shown in plaintext).
+3. **Add a second cron trigger**: same Worker → **Settings** → **Triggers** →
+   **Add Cron Trigger** → enter `*/20 * * * *` (every 20 minutes). You should
+   now have two cron triggers on this Worker — the original `*/10 * * * *`
+   for the feed cache, and this new one for the rebuild.
+4. Redeploy the updated `feed-aggregator.js` code (it now checks
+   `event.cron` to tell the two schedules apart).
+
+This means new articles show up on the live site within ~20 minutes of
+publishing, without you doing anything manually.
+
 ## Known gaps once this is live
+
 - No auth/rate-limiting on the `/feed` endpoint — fine for now given it's read-only
   public content, but worth revisiting if traffic grows.
 - If TechLabari or Labari Journal ever password-protect or rate-limit their REST

@@ -1,0 +1,24 @@
+# workers/wrangler.toml
+#
+# This file did not exist before the Git integration was connected — without
+# it, `npx wrangler deploy` has no way to know this Worker's name, its
+# FEED_CACHE KV binding, or its two cron schedules, since all of that was set
+# up manually through the dashboard rather than committed as config. Recreate
+# that exact setup here before the Git-connected deploy runs for real,
+# otherwise the next deploy risks dropping the KV binding and/or cron triggers.
+
+# Confirmed matching the Cloudflare dashboard's registered Worker name.
+name = "labari-feed"
+
+main = "feed-aggregator.js"
+compatibility_date = "2026-07-01"
+
+[[kv_namespaces]]
+binding = "FEED_CACHE"
+id = "292f1fff2aeb4cf4baf7d37f36aca2f4"
+
+[triggers]
+crons = [
+  "*/10 * * * *", # refresh the merged feed cache
+  "*/20 * * * *", # trigger the Cloudflare Pages rebuild (DEPLOY_HOOK_URL)
+]

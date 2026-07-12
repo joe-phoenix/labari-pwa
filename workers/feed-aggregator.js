@@ -43,11 +43,35 @@ export default {
     return json({ error: 'not_found' }, 404);
   },
 
-  // Cron trigger: refresh cache proactively so users never hit a cold fetch
+  // Two cron schedules run through this one handler, distinguished by
+  // event.cron — see wrangler.toml for the actual schedule strings:
+  //   */10 * * * *  -> refresh the merged feed cache (existing, frequent)
+  //   */20 * * * *  -> trigger a Cloudflare Pages rebuild (new, less frequent,
+  //                     since a full site rebuild is heavier than a cache refresh)
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(refreshMergedFeed(env));
+    if (event.cron === '*/20 * * * *') {
+      ctx.waitUntil(triggerPagesRebuild(env));
+    } else {
+      ctx.waitUntil(refreshMergedFeed(env));
+    }
   },
 };
+
+async function triggerPagesRebuild(env) {
+  // DEPLOY_HOOK_URL is a Cloudflare Pages "Deploy Hook" — created in the
+  // dashboard under Pages project > Settings > Builds & deployments > Deploy
+  // hooks, then stored as a Worker secret: `wrangler secret put DEPLOY_HOOK_URL`.
+  // Hitting it with a POST triggers a fresh build from the latest commit,
+  // which re-runs the build-time feed fetch in app/page.tsx and bakes in
+  // whatever's new since the last build.
+  if (!env.DEPLOY_HOOK_URL) return;
+  try {
+    await fetch(env.DEPLOY_HOOK_URL, { method: 'POST' });
+  } catch {
+    // A missed rebuild trigger isn't critical — the next scheduled attempt
+    // will pick it up, and the /feed endpoint itself stays fresh regardless.
+  }
+}
 
 async function getMergedFeed(env, ctx) {
   const cached = await env.FEED_CACHE.get(CACHE_KEY, 'json');
