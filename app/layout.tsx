@@ -21,13 +21,13 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Labari — TechLabari & Labari Journal',
+  title: 'Labari Media - Beyond The Surface',
   description: 'Pan-African tech and culture journalism, curated and readable offline.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Labari',
+    title: 'Labari Media',
   },
 };
 
